@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: devlaunch-local
+  namespace: argocd
+spec:
+  description: Local demo application resources only
+  sourceRepos:
+    - https://github.com/iamyoussef2005/devlaunch-gitops.git
+  destinations:
+    - namespace: devlaunch-apps
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: apps
+      kind: Deployment
+    - group: ""
+      kind: Service

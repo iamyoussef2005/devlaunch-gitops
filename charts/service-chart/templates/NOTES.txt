@@ -1,0 +1,4 @@
+Service {{ include "service-chart.fullname" . }} is internal to the cluster.
+For local access:
+  kubectl -n {{ .Release.Namespace }} port-forward --address 127.0.0.1 service/{{ include "service-chart.fullname" . }} 8080:{{ .Values.service.port }}
+  curl http://127.0.0.1:8080{{ .Values.probes.readinessPath }}

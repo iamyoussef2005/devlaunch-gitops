@@ -1,0 +1,8 @@
+.env
+.env.*
+*.key
+*.pem
+*.tfstate*
+*.tfvars
+*.tfplan
+node_modules/

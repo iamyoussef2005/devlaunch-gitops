@@ -1,0 +1,56 @@
+{{- $repository := required "image.repository is required" .Values.image.repository -}}
+{{- $tag := .Values.image.tag -}}
+{{- if not .Values.image.digest -}}
+{{- $tag = required "image.tag is required when image.digest is empty" $tag -}}
+{{- end -}}
+{{- if and (not .Values.image.digest) (eq (lower (toString $tag)) "latest") -}}
+{{- fail "image.tag must not be latest; use a specific tag or digest" -}}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "service-chart.fullname" . }}
+  labels:
+    {{- include "service-chart.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "service-chart.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "service-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "service-chart.serviceAccountName" . }}
+      automountServiceAccountToken: false
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ include "service-chart.name" . }}
+          image: {{ if .Values.image.digest }}{{ printf "%s@%s" $repository .Values.image.digest | quote }}{{ else }}{{ printf "%s:%s" $repository $tag | quote }}{{ end }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.containerPort }}
+              protocol: TCP
+          env:
+            - name: PORT
+              value: {{ .Values.containerPort | quote }}
+            {{- with .Values.env }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readinessPath | quote }}
+              port: http
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.livenessPath | quote }}
+              port: http
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}

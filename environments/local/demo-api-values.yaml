@@ -1,0 +1,9 @@
+nameOverride: demo-api
+replicaCount: 1
+image:
+  repository: devlaunch-demo-api
+  tag: "1.0.0-d25f3832a5da"
+  pullPolicy: Never
+serviceAccount:
+  create: false
+  name: devlaunch-app

@@ -1,0 +1,6 @@
+nameOverride: demo-api
+image:
+  repository: devlaunch-demo-api
+  tag: day5
+  digest: ""
+  pullPolicy: Never
